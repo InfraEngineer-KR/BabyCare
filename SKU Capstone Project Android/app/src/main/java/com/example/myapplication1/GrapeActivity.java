@@ -1,5 +1,5 @@
 package com.example.myapplication1;
-
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -60,7 +60,9 @@ public class GrapeActivity extends AppCompatActivity {
         initViews();
 
         btnBack.setOnClickListener(v -> finish());
-
+        // "아기방 실시간 보기" 카드 → 카메라 화면
+        findViewById(R.id.cardSleepLive).setOnClickListener(v ->
+                startActivity(new Intent(this, camera.class)));
         loadEnvironmentHistory();
     }
 

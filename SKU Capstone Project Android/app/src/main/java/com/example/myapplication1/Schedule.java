@@ -186,7 +186,14 @@ public class Schedule extends AppCompatActivity {
 
             tvNextVaccineDate.setText(statusText);
 
-            cardUpcomingSummary.setOnClickListener(v -> showEditDialog(next));
+            // [비활성화] 접종일 수정 기능
+            // - 앱: 수정 창(showEditDialog) + 서버 요청(updateVaccineOnServer)은 구현됨
+            // - 서버: PUT /api/vaccine/update/:id API와 변경 날짜 저장 구조가 없어 항상 "수정 실패"
+            // → 서버 API를 만든 뒤 아래 줄 주석을 풀면 활성화됨
+            //서버에 사용자별 변경 날짜를 저장하는 컬렉션과 PUT /api/vaccine/update/:id API를 추가합니다.
+            //서버의 getVaccineSchedule에서 저장된 날짜로 덮어쓰도록 수정합니다.
+            // 앱 196번째 줄 주석을 풉니다.
+            // cardUpcomingSummary.setOnClickListener(v -> showEditDialog(next));
 
             sendNotification(
                     "접종 알림",

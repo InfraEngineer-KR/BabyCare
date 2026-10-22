@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    android:fitsSystemWindows="true"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF"
+    android:padding="30dp">
+
+    <TextView
+        android:id="@+id/tv_terms_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="약관 동의"
+        android:textColor="#1A1A1A"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ScrollView
+        android:id="@+id/sv_terms"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="20dp"
+        android:background="@drawable/bg_edittext_rounded"
+        android:padding="15dp"
+        app:layout_constraintBottom_toTopOf="@id/cb_agree"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_terms_title"
+        app:layout_constraintVertical_bias="1.0">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:lineSpacingExtra="6dp"
+            android:text="[개인정보 수집 및 이용 동의]\n\n1. 개인정보의 수집 및 이용 목적\n회사는 다음과 같은 목적을 위하여 개인정보를 수집하고 이용합니다.\n\n가. 회원 관리\n- 회원제 서비스 이용에 따른 본인확인, 개인 식별, 불량회원의 부정 이용 방지와 비인가 사용 방지, 가입 의사 확인, 가입 및 가입횟수 제한, 분쟁 조정을 위한 기록보존, 고지사항 전달\n\n나. 서비스 제공\n- 서비스 제공, 콘텐츠 제공, 맞춤 서비스 제공, 본인인증\n\n2. 수집하는 개인정보의 항목\n회사는 회원가입, 상담, 서비스 신청 등을 위해 아래와 같은 개인정보를 수집하고 있습니다.\n- 필수항목 : 이름, 아이디, 비밀번호, 이메일\n- 자동수집항목 : 서비스 이용기록, 접속 로그, 쿠키, 접속 IP 정보\n\n3. 개인정보의 보유 및 이용 기간\n원칙적으로, 개인정보 수집 및 이용목적이 달성된 후에는 해당 정보를 지체 없이 파기합니다. 단, 다음의 정보에 대해서는 아래의 이유로 명시한 기간 동안 보존합니다.\n\n가. 회사 내부 방침에 의한 정보보유 사유\n- 부정이용 기록 : 1년 (부정 이용 방지)\n\n나. 관련 법령에 의한 정보보유 사유\n- 계약 또는 청약철회 등에 관한 기록 : 5년\n- 대금결제 및 재화 등의 공급에 관한 기록 : 5년\n- 소비자의 불만 또는 분쟁처리에 관한 기록 : 3년\n\n4. 동의를 거부할 권리\n이용자는 개인정보 수집 및 이용에 대해 동의를 거부할 권리가 있습니다. 단, 필수항목에 대한 동의를 거부할 경우 회원가입 및 서비스 이용이 제한될 수 있습니다."
+            android:textColor="#555555"
+            android:textSize="13sp" />
+    </ScrollView>
+
+    <CheckBox
+        android:id="@+id/cb_agree"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:text="개인정보 수집 및 이용에 동의합니다."
+        android:textColor="#1A1A1A"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@id/btn_next"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btn_next"
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:layout_marginBottom="20dp"
+        android:alpha="0.5"
+        android:background="@drawable/bg_button_purple"
+        android:enabled="false"
+        android:text="다음"
+        android:textColor="#FFFFFF"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

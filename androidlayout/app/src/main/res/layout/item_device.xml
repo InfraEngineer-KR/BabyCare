@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_marginBottom="24dp"
+    android:background="@drawable/bg_rounded_input"
+    android:backgroundTint="#FFFFFF"
+    android:padding="30dp">
+
+    <!-- 기기 이름 -->
+    <TextView
+        android:id="@+id/tvDeviceName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="기기 이름"
+        android:textColor="#2D3250"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="20dp" />
+
+    <!-- 온오프 버튼 -->
+    <Button
+        android:id="@+id/btnOnOff"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginBottom="16dp"
+        android:text="ON"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#2D3250"
+        android:visibility="gone" />
+
+    <!-- AUTO 버튼 -->
+    <Button
+        android:id="@+id/btnAuto"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginBottom="16dp"
+        android:text="AUTO"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#9DA4BC"
+        android:visibility="gone" />
+
+    <!-- 팬 단계 행 (1~3단계) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="16dp">
+
+        <TextView
+            android:id="@+id/tvFanSpeed"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="단계: --"
+            android:textColor="#2D3250"
+            android:textSize="48sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
+
+        <ImageButton
+            android:id="@+id/btnFanDown"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginEnd="8dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/outline_arrow_downward_alt_24"
+            app:tint="#2D3250"
+            android:visibility="gone" />
+
+        <ImageButton
+            android:id="@+id/btnFanUp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/outline_arrow_upward_alt_24"
+            app:tint="#2D3250"
+            android:visibility="gone" />
+    </LinearLayout>
+
+    <!-- 에어컨 온도 행 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/tvTempValue"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="설정: --°C"
+            android:textColor="#2D3250"
+            android:textSize="48sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
+
+        <ImageButton
+            android:id="@+id/btnTempDown"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginEnd="8dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/outline_arrow_downward_alt_24"
+            app:tint="#2D3250"
+            android:visibility="gone" />
+
+        <ImageButton
+            android:id="@+id/btnTempUp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/outline_arrow_upward_alt_24"
+            app:tint="#2D3250"
+            android:visibility="gone" />
+    </LinearLayout>
+
+</LinearLayout>

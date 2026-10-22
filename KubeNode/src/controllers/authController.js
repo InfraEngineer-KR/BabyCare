@@ -10,7 +10,7 @@ const { sendVerifyMail } = require("../utils/mailer");
 const { getClientInfo } = require("../utils/authHelper");
 
 const JWT_SECRET = process.env.JWT_SECRET || "dev-secret";
-const ACCESS_EXPIRES_IN = "15m";
+const ACCESS_EXPIRES_IN = "7d";
 const REFRESH_EXPIRES_IN = "14d";
 
 /* =====================================================

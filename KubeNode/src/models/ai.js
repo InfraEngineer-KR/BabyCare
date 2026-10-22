@@ -10,6 +10,7 @@ const aiReportSchema = new mongoose.Schema({
     avgScore: Number,         // 평균 수면 점수
     cryingCount: Number,      // 울음 횟수
     reportText: String,       // GPT가 생성한 보고서 내용
+    isSample: { type: Boolean, default: false }, // 예시 데이터로 만든 리포트 여부
 }, {
     timestamps: true          // createdAt, updatedAt 자동 생성
 });

@@ -37,8 +37,14 @@ public class CryAlertService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
 
         // MenuActivity에서 userId 받아오기
-        if (intent != null) {
+        if (intent != null && intent.getStringExtra("userId") != null) {
             userId = intent.getStringExtra("userId");
+        }
+
+        // 시스템이 서비스를 재시작하면 intent가 null → 저장된 아이디 사용
+        if (userId == null || userId.isEmpty()) {
+            userId = getSharedPreferences("UserPrefs", MODE_PRIVATE)
+                    .getString("username", "");
         }
 
         // 포그라운드 서비스 시작
@@ -54,6 +60,15 @@ public class CryAlertService extends Service {
      * Socket 연결
      */
     private void connectSocket() {
+        // 이미 만든 소켓이 있으면 새로 만들지 않음 (알림 중복 방지)
+        if (socket != null) {
+            if (socket.connected()) {
+                socket.emit("register", userId);   // 아이디만 다시 등록
+            } else {
+                socket.connect();                  // 끊겨 있으면 다시 연결
+            }
+            return;
+        }
 
         try {
 
@@ -292,6 +307,7 @@ public class CryAlertService extends Service {
 
             socket.disconnect();
             socket.off();
+            socket = null;
         }
     }
 }

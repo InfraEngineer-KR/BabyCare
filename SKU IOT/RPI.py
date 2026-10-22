@@ -78,11 +78,12 @@ def build_ffmpeg_cmd(mic_num):
 
 
 def ffmpeg_loop():
+    # 마이크가 잡힐 때까지 재시도 (부팅 직후 USB 인식이 늦을 수 있음)
     mic_num = get_mic_num()
-
-    if not mic_num:
-        print("Mic not found.")
-        return
+    while not mic_num:
+        print("Mic not found. Retry after 2 seconds...")
+        time.sleep(2)
+        mic_num = get_mic_num()
 
     print(f"Mic found: hw:{mic_num},0")
     print(f"Streaming to {SERVER_IP}:{STREAM_PORT}")

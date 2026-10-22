@@ -16,12 +16,12 @@ exports.setApp = function(app) {
 /**
  * 위험 상태 검사 + Socket 알림
  */
-const checkDangerCondition = async (userId, temperature, io) => {
+// previous: 이번 데이터를 저장하기 "전"의 최신 기록 (급변 비교용)
+const checkDangerCondition = async (userId, temperature, io, previous) => {
 
     try {
 
-        const latest = await TemperHumility.findOne({ userId })
-            .sort({ timestamp: -1 });
+        const latest = previous;
 
         if (temperature >= TEMP_HIGH) {
             console.log(`[고온 감지] ${temperature}도`);
@@ -195,7 +195,7 @@ exports.onData = async function(data) {
             `[MQTT 저장] userId=${userId}, temp=${temperature}, hum=${humidity}, sleepScore=${sleepScore}`
         );
 
-        await checkDangerCondition(userId, temperature, io);
+                await checkDangerCondition(userId, temperature, io, latest);
 
     } catch (error) {
         console.error('[onData 실패]', error.message);
@@ -205,40 +205,51 @@ exports.onData = async function(data) {
 /**
  * 울음 감지 → DB 업데이트 + sleepScore 재계산 + Android 알림
  */
+const CRY_ALERT_COOLDOWN_MS = 30 * 1000;   // 울음 알림 최소 간격 (30초)
+let lastCryAlertAt = 0;
+
 exports.saveCryEvent = async function(userId, cryProbability, io) {
 
+    // 1. DB 기록 (온습도 기록이 아직 없으면 건너뜀)
     try {
-
         const latest = await TemperHumility.findOne({ userId })
             .sort({ timestamp: -1 });
 
-        const temperature = latest?.temperature ?? null;
-        const humidity = latest?.humidity ?? null;
-        const noise = latest?.noise ?? null;
-        const sleepScore = calcScore(temperature, humidity, noise, true);
+        if (latest) {
+            const sleepScore = calcScore(latest.temperature, latest.humidity, latest.noise, true);
 
-        await TemperHumility.findByIdAndUpdate(latest._id, {
-            $set: {
-                cryDetected: true,
-                cryProbability,
-                sleepScore
-            }
-        });
-
-        console.log(`[울음 감지] userId=${userId}, 확률=${cryProbability}, sleepScore=${sleepScore}`);
-
-        if (io) {
-            io.to(userId).emit('cryAlert', {
-                type: 'CRY_DETECTED',
-                userId,
-                cryProbability,
-                message: `아기 울음이 감지되었습니다 (확률: ${(cryProbability * 100).toFixed(1)}%)`
+            await TemperHumility.findByIdAndUpdate(latest._id, {
+                $set: {
+                    cryDetected: true,
+                    cryProbability,
+                    sleepScore
+                }
             });
+
+            console.log(`[울음 감지] userId=${userId}, 확률=${cryProbability}, sleepScore=${sleepScore}`);
+        } else {
+            console.warn(`[울음 감지] userId=${userId} 온습도 기록이 없어 DB 기록은 건너뜀`);
         }
 
     } catch (error) {
         console.error('[saveCryEvent 실패]', error.message);
     }
+
+    // 2. 알림 (DB 결과와 상관없이 보냄, 쿨다운 적용)
+    const now = Date.now();
+    if (!io || now - lastCryAlertAt < CRY_ALERT_COOLDOWN_MS) return;
+    lastCryAlertAt = now;
+
+    const percent = cryProbability != null
+        ? `${(cryProbability * 100).toFixed(1)}%`
+        : '알 수 없음';
+
+    io.to(userId).emit('cryAlert', {
+        type: 'CRY_DETECTED',
+        userId,
+        cryProbability,
+        message: `아기 울음이 감지되었습니다 (확률: ${percent})`
+    });
 };
 
 // /**

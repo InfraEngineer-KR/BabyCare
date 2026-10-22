@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:fitsSystemWindows="true"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingHorizontal="28dp"
+    android:paddingTop="60dp" android:paddingBottom="32dp"
+    android:background="#FFFFFF">
+
+    <TextView
+        android:id="@+id/detailTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="28sp" android:lineSpacingExtra="4dp"
+        android:textStyle="bold"
+        android:textColor="#1F2246"
+        android:letterSpacing="-0.02"
+        android:text="육아종합지원서비스 제공" />
+
+    <TextView
+        android:id="@+id/detailDept"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="14dp"
+        android:textColor="#888888"
+        android:textSize="14sp"
+        android:text="🏢 교육부" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1.5dp"
+        android:layout_marginVertical="32dp"
+        android:background="#F0F0F0" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fadeScrollbars="true"
+        android:scrollbars="none">
+
+        <TextView
+            android:id="@+id/detailSummary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="17sp" android:lineSpacingExtra="10dp" android:textColor="#444444"
+            android:text="영유아 및 부모 대상 상담 · 교육 · 프로그램 등 종합 육아 서비스를 제공합니다. 이곳에는 정책의 상세 내용이 들어갑니다. 가독성을 위해 줄 간격을 충분히 확보했습니다. 긴 문장이라도 사용자가 편하게 읽을 수 있도록 세심하게 설계되었습니다." />
+    </ScrollView>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnGoWeb"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginTop="32dp"
+        android:text="공식 홈페이지 방문하기"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="#FFFFFF"
+        app:backgroundTint="#1F2246"
+        app:cornerRadius="16dp" app:elevation="8dp" android:stateListAnimator="@null"
+        android:insetBottom="0dp"
+        android:insetTop="0dp" />
+
+</LinearLayout>

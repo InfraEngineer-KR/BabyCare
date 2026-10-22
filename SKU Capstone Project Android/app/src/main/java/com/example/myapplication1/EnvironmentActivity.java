@@ -55,7 +55,7 @@ public class EnvironmentActivity extends AppCompatActivity {
 
         SharedPreferences pref = getSharedPreferences("UserPrefs", MODE_PRIVATE);
         accessToken = pref.getString("accessToken", "");
-        userId = pref.getString("userId", "");
+        userId = pref.getString("username", "");
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BuildConfig.BASE_URL + "/")
@@ -66,10 +66,7 @@ public class EnvironmentActivity extends AppCompatActivity {
 
         rvDevices.setLayoutManager(new LinearLayoutManager(this));
 
-        btnBack.setOnClickListener(v -> {
-            startActivity(new Intent(this, Menuactivity.class));
-            finish();
-        });
+        btnBack.setOnClickListener(v -> finish());
 
         // 자동제어 토글
         switchAutoControl.setOnCheckedChangeListener((btn, isChecked) -> {

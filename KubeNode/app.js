@@ -17,6 +17,19 @@ const temhuController = require('./src/controllers/TemhuController');
 const sleepController = require('./src/controllers/sleepController');
 const aiController = require('./src/controllers/aiController');
 
+// =========================================================
+// IoT 기기 주인 (센서/카메라 데이터를 이 계정으로 저장)
+// =========================================================
+const IOT_USER_ID = process.env.IOT_USER_ID || null;
+
+if (IOT_USER_ID) {
+  soundAnalysisController.setUserId(IOT_USER_ID);
+  temhuController.setUserId(IOT_USER_ID);
+  videoController.setUserId(IOT_USER_ID);
+} else {
+  console.warn('⚠️ IOT_USER_ID 미설정: 앱이 접속하기 전까지 센서 데이터가 저장되지 않습니다.');
+}
+
 const app = express();
 const server = http.createServer(app);
 
@@ -48,9 +61,12 @@ io.on('connection', (socket) => {
 
     console.log(`✅ [${userId}] 소켓 등록됨`);
 
-    soundAnalysisController.setUserId(userId);
-    temhuController.setUserId(userId);
-    videoController.setUserId(userId);
+    // 기기 주인이 .env로 고정돼 있으면 앱 접속으로 바꾸지 않음
+    if (!IOT_USER_ID) {
+      soundAnalysisController.setUserId(userId);
+      temhuController.setUserId(userId);
+      videoController.setUserId(userId);
+    }
   });
 
   socket.on('disconnect', () => {
@@ -145,7 +161,7 @@ const CRON_DAILY_REPORT =
 cron.schedule(CRON_DAILY_REPORT, () => {
   console.log('🌅 [AI] 일일 리포트 생성');
   sleepController.generateDailyComprehensiveReport();
-});
+}, { timezone: 'Asia/Seoul' });
 
 const { startAutoControlScheduler } = require('./src/controllers/smartThingsController');
 
@@ -171,6 +187,7 @@ server.listen(PORT, HOST, async () => {
 
     axios.post(`${BASE_URL}/api/video/start`).catch(() => {});
     axios.post(`${BASE_URL}/api/sound-analysis/start`).catch(() => {});
+   // 오늘 리포트가 없을 때만 생성 (8시에 서버가 꺼져 있었던 경우 보충)
     await aiController.generateDailyReport();
 
     console.log(`🚀 서버 가동 중: http://${HOST}:${PORT}`);

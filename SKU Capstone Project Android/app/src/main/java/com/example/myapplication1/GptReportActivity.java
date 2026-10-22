@@ -34,12 +34,7 @@ public class GptReportActivity extends AppCompatActivity {
         tvReportContent = findViewById(R.id.tvReportContent);
         btnBack = findViewById(R.id.btnBack);
 
-        btnBack.setOnClickListener(v -> {
-            Intent intent = new Intent(GptReportActivity.this, Menuactivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(intent);
-            finish();
-        });
+        btnBack.setOnClickListener(v -> finish());
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BuildConfig.BASE_URL + "/")

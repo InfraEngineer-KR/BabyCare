@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 하단바 선택 표시: 칸 너비와 상관없이 가운데에 고정 크기 원 (태블릿/가로에서 늘어나지 않게) -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:width="56dp"
+        android:height="56dp"
+        android:gravity="center">
+        <shape android:shape="oval">
+            <solid android:color="#FFD9B8" />
+        </shape>
+    </item>
+</layer-list>

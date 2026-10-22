@@ -23,22 +23,19 @@ const HLS_DIR =
 const CAMERA_TIMEOUT_MS =
     parseInt(process.env.CAMERA_TIMEOUT_MS) || 5000
 
+const RESTART_DELAY_MS = 3000            // ffmpeg 종료 시 재시작 대기
+
 const FRAME_WIDTH = 1280
 const FRAME_HEIGHT = 720
 const FRAME_SIZE = FRAME_WIDTH * FRAME_HEIGHT * 3
 
+let ffmpegProcess = null                 // 분석용 (raw RGB + raw audio)
+let hlsProcess = null                    // HLS 스트리밍용
+let frameBuffer = Buffer.alloc(0)
+
 // =========================================================
 // HLS 폴더 준비
 // =========================================================
-if (!fs.existsSync(HLS_DIR)) {
-    fs.mkdirSync(HLS_DIR, { recursive: true })
-} else {
-    // 서버 재시작 시 기존 파일 삭제
-    fs.readdirSync(HLS_DIR).forEach(file => {
-        fs.unlinkSync(path.join(HLS_DIR, file))
-    })
-}
-
 function clearHlsDir() {
     if (!fs.existsSync(HLS_DIR)) return
     fs.readdirSync(HLS_DIR).forEach(file => {
@@ -48,88 +45,120 @@ function clearHlsDir() {
     })
 }
 
+if (!fs.existsSync(HLS_DIR)) {
+    fs.mkdirSync(HLS_DIR, { recursive: true })
+} else {
+    // 서버 재시작 시 기존 파일 삭제
+    clearHlsDir()
+}
+
+// =========================================================
+// FFMPEG 공통 감시
+// - stderr 읽어서 파이프 안 막히게
+// - 에러/종료 시 서버는 살려두고 RESTART_DELAY_MS 후 재시작
+// =========================================================
+function watchProcess(proc, name, restart) {
+    let restarting = false
+
+    const scheduleRestart = (reason) => {
+        if (restarting) return
+        restarting = true
+        console.error(`[${name}] ${reason} → ${RESTART_DELAY_MS / 1000}초 후 재시작`)
+        setTimeout(restart, RESTART_DELAY_MS)
+    }
+
+    proc.stderr.on('data', () => {})
+    proc.stdin.on('error', (err) => console.error(`[${name}] 입력 에러:`, err.message))
+    proc.on('error', (err) => scheduleRestart(`실행 에러: ${err.message}`))
+    proc.on('exit', (code, signal) => scheduleRestart(`종료 code: ${code} signal: ${signal}`))
+}
+
 // =========================================================
 // FFMPEG: 분석용 (raw RGB + raw audio)
 // =========================================================
-const ffmpegProcess = spawn('ffmpeg', [
-    '-fflags', '+discardcorrupt',
-    '-f', 'mpegts',
-    '-i', 'pipe:0',
+function startAnalysisFfmpeg() {
+    // 이전 프로세스에서 남은 조각은 버림 (새 스트림과 섞이면 데이터가 어긋남)
+    frameBuffer = Buffer.alloc(0)
+    soundAnalysisController.audioRemainder = Buffer.alloc(0)
 
-    // 영상 → pipe:1
-    '-map', '0:v',
-    '-vf', `scale=${FRAME_WIDTH}:${FRAME_HEIGHT}`,
-    '-f', 'rawvideo',
-    '-pix_fmt', 'rgb24',
-    'pipe:1',
+    const proc = spawn('ffmpeg', [
+        '-loglevel', 'error',
+        '-fflags', '+discardcorrupt',
+        '-f', 'mpegts',
+        '-i', 'pipe:0',
 
-    // 오디오 → pipe:3 (오디오 없으면 그냥 건너뜀: 0:a?)
-    '-map', '0:a?',
-    '-f', 'f32le',
-    '-ar', '48000',
-    '-ac', '1',
-    'pipe:3'
-], {
-    stdio: ['pipe', 'pipe', 'pipe', 'pipe']
-})
+        // 영상 → pipe:1
+        '-map', '0:v',
+        '-vf', `scale=${FRAME_WIDTH}:${FRAME_HEIGHT}`,
+        '-f', 'rawvideo',
+        '-pix_fmt', 'rgb24',
+        'pipe:1',
 
-// stderr 읽어서 파이프 안 막히게
-ffmpegProcess.stderr.on('data', () => {})
-ffmpegProcess.on('exit', (code, signal) => {
-    console.error(`[ff-analysis] 종료 code: ${code} signal: ${signal}`)
-})
-ffmpegProcess.on('error', (err) => {
-    console.error('[ff-analysis] 실행 에러:', err.message)
-})
+        // 오디오 → pipe:3 (오디오 없으면 그냥 건너뜀: 0:a?)
+        '-map', '0:a?',
+        '-f', 'f32le',
+        '-ar', '48000',
+        '-ac', '1',
+        'pipe:3'
+    ], {
+        stdio: ['pipe', 'pipe', 'pipe', 'pipe']
+    })
 
-// =========================================================
-// 비디오 프레임 처리
-// =========================================================
-let frameBuffer = Buffer.alloc(0)
+    // 비디오 프레임 처리
+    proc.stdout.on('data', (chunk) => {
+        frameBuffer = Buffer.concat([frameBuffer, chunk])
 
-ffmpegProcess.stdout.on('data', (chunk) => {
-    frameBuffer = Buffer.concat([frameBuffer, chunk])
+        while (frameBuffer.length >= FRAME_SIZE) {
+            const frame = frameBuffer.slice(0, FRAME_SIZE)
+            frameBuffer = frameBuffer.slice(FRAME_SIZE)
+            videoController.onFrame(frame)
+        }
+    })
 
-    while (frameBuffer.length >= FRAME_SIZE) {
-        const frame = frameBuffer.slice(0, FRAME_SIZE)
-        frameBuffer = frameBuffer.slice(FRAME_SIZE)
-        videoController.onFrame(frame)
-    }
-})
+    // 오디오 처리
+    proc.stdio[3].on('data', (audioChunk) => {
+        soundAnalysisController.onAudio(audioChunk)
+    })
+    proc.stdio[3].on('error', (err) => {
+        console.error('[ff-analysis] 오디오 출력 에러:', err.message)
+    })
 
-// =========================================================
-// 오디오 처리
-// =========================================================
-ffmpegProcess.stdio[3].on('data', (audioChunk) => {
-    soundAnalysisController.onAudio(audioChunk)
-})
+    watchProcess(proc, 'ff-analysis', startAnalysisFfmpeg)
+    ffmpegProcess = proc
+    console.log('🎬 ffmpeg(분석) 시작')
+}
 
 // =========================================================
 // FFMPEG: HLS 스트리밍
 // =========================================================
-const hlsProcess = spawn('ffmpeg', [
-    '-f', 'mpegts',
-    '-i', 'pipe:0',
-    '-c:v', 'copy',
-    '-c:a', 'copy',
-    '-f', 'hls',
-    '-hls_time', '2',
-    '-hls_list_size', '5',
-    '-hls_flags', 'delete_segments+append_list',
-    '-hls_allow_cache', '0',
-    '-hls_segment_filename', path.join(HLS_DIR, 'streamingfile%d.ts'),
-    path.join(HLS_DIR, 'streamingfile.m3u8')
-], {
-    stdio: ['pipe', 'pipe', 'pipe']
-})
+function startHlsFfmpeg() {
+    // 이전 세그먼트/목록이 남아 있으면 플레이어가 꼬이므로 정리
+    clearHlsDir()
 
-hlsProcess.stderr.on('data', () => {})
-hlsProcess.on('exit', (code, signal) => {
-    console.error(`[ff-hls] 종료 code: ${code} signal: ${signal}`)
-})
-hlsProcess.on('error', (err) => {
-    console.error('[ff-hls] 실행 에러:', err.message)
-})
+    const proc = spawn('ffmpeg', [
+        '-loglevel', 'error',
+        '-f', 'mpegts',
+        '-i', 'pipe:0',
+        '-c:v', 'copy',
+        '-c:a', 'copy',
+        '-f', 'hls',
+        '-hls_time', '2',
+        '-hls_list_size', '5',
+        // omit_endlist: ffmpeg가 죽어도 '방송 끝' 표시 안 씀 (플레이어가 재생 종료로 판단하지 않게)
+        '-hls_flags', 'delete_segments+append_list+omit_endlist',
+        // 재시작해도 세그먼트 번호가 계속 증가하도록 (플레이어가 이미 본 번호로 착각하지 않게)
+        '-hls_start_number_source', 'datetime',
+        '-hls_allow_cache', '0',
+        '-hls_segment_filename', path.join(HLS_DIR, 'streamingfile%d.ts'),
+        path.join(HLS_DIR, 'streamingfile.m3u8')
+    ], {
+        stdio: ['pipe', 'ignore', 'pipe']
+    })
+
+    watchProcess(proc, 'ff-hls', startHlsFfmpeg)
+    hlsProcess = proc
+    console.log('📺 ffmpeg(HLS) 시작')
+}
 
 // =========================================================
 // UDP 서버
@@ -147,12 +176,9 @@ udpServer.on('message', (msg) => {
 
     lastMessageTime = Date.now()
 
-    try {
-        ffmpegProcess.stdin.write(msg)
-        hlsProcess.stdin.write(msg)
-    } catch (err) {
-        console.error('[UDP] stdin write 에러:', err.message)
-    }
+    // 프로세스가 살아 있을 때만 전달 (재시작 중이면 건너뜀)
+    if (ffmpegProcess && ffmpegProcess.stdin.writable) ffmpegProcess.stdin.write(msg)
+    if (hlsProcess && hlsProcess.stdin.writable) hlsProcess.stdin.write(msg)
 })
 
 udpServer.on('error', (err) => {
@@ -211,6 +237,11 @@ mqttClient.on('message', (topic, message) => {
     // 열화상
     // ─────────────────────────────────────────────────────
     if (topic === 'baby/thermal') {
+        if (!Array.isArray(data.frame) || data.frame.length === 0) {
+            console.error('[MQTT] 열화상 데이터 형식 오류 → 건너뜀')
+            return
+        }
+
         const avg = (
             data.frame.reduce((a, b) => a + b, 0) / data.frame.length
         ).toFixed(2)
@@ -226,6 +257,11 @@ mqttClient.on('message', (topic, message) => {
     // 온습도
     // ─────────────────────────────────────────────────────
     else if (topic === 'baby/environment') {
+        if (typeof data.temperature !== 'number' || typeof data.humidity !== 'number') {
+            console.error('[MQTT] 온습도 데이터 형식 오류 → 건너뜀')
+            return
+        }
+
         console.log(
              `[MQTT] 온습도 수신: ${data.temperature}°C ${data.humidity}%`
         )
@@ -240,6 +276,9 @@ mqttClient.on('message', (topic, message) => {
 // =========================================================
 function init(wssInstance) {
     wss = wssInstance
+
+    startAnalysisFfmpeg()
+    startHlsFfmpeg()
 
     udpServer.bind(UDP_PORT, () => {
         console.log(`📡 UDP 수신 대기 중 (${UDP_PORT})`)

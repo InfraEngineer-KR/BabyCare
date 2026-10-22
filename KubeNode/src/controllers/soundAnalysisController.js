@@ -42,6 +42,8 @@ class SoundAnalysisController {
 
     // 울음 상태
     this.currentCryEvent = null;
+    // 4바이트(float32) 단위로 안 맞아서 남은 바이트 (다음 chunk 앞에 붙임)
+    this.audioRemainder = Buffer.alloc(0);
   }
 
   // server.js에서 app 주입
@@ -61,22 +63,35 @@ class SoundAnalysisController {
 
   onAudio(audioChunk) {
 
-    const samples = new Float32Array(audioChunk.buffer);
+    // 이전 chunk에서 남은 바이트(4바이트 미만)를 앞에 붙임
+    const data = this.audioRemainder.length > 0
+      ? Buffer.concat([this.audioRemainder, audioChunk])
+      : audioChunk;
 
-    this.audioBuffer.push(...samples);
+    // 4바이트 단위로 쓸 수 있는 길이만 사용, 남은 조각은 다음 chunk로
+    const usable = data.length - (data.length % 4);
+    this.audioRemainder = Buffer.from(data.subarray(usable));
+
+    if (usable === 0) return;
+
+    // 이 chunk의 샘플만 정확히 읽음 (메모리 전체를 읽지 않음)
+    const samples = new Float32Array(usable / 4);
+    for (let i = 0; i < samples.length; i++) {
+      samples[i] = data.readFloatLE(i * 4);
+    }
+
+    for (let i = 0; i < samples.length; i++) {
+      this.audioBuffer.push(samples[i]);
+    }
 
     if (this.audioBuffer.length > 96000) {
-
-      this.audioBuffer.splice(
-        0,
-        this.audioBuffer.length - 96000
-      );
+      this.audioBuffer.splice(0, this.audioBuffer.length - 96000);
     }
 
     const db = this.calculateDb(samples);
     this.dbSamples.push(db);
     if (this.dbSamples.length > 600) {
-        this.dbSamples.shift();
+      this.dbSamples.shift();
     }
   }
 
