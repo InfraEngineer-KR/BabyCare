@@ -1,5 +1,6 @@
 package com.example.myapplication1;
 
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -29,11 +30,13 @@ public class camera extends AppCompatActivity {
     private final Handler handler = new Handler(Looper.getMainLooper());
     private boolean isActive = false;   // 화면이 보이는 중인지 (onPause의 stop은 재연결 안 함)
     private long lastProgressAt = 0;    // 마지막으로 재생이 진행된 시각
+    private boolean isPortrait = true;  // 세로면 영상을 90도 돌려서 꽉 채움
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera);
+        findViewById(R.id.btnBack).setOnClickListener(v -> finish());   // 추가
 
         statusText = findViewById(R.id.statusText);
         VLCVideoLayout playerView = findViewById(R.id.playerView);
@@ -43,8 +46,13 @@ public class camera extends AppCompatActivity {
         options.add("--live-caching=150");
         options.add("--clock-jitter=0");
         options.add("--clock-synchro=0");
-        options.add("--video-filter=transform");
-        options.add("--transform-type=90");    // 90도 회전
+        // 폰을 돌리면 화면이 새로 만들어지므로, 그때마다 방향에 맞게 설정
+        isPortrait = getResources().getConfiguration().orientation
+                == Configuration.ORIENTATION_PORTRAIT;
+        if (isPortrait) {
+            options.add("--video-filter=transform");
+            options.add("--transform-type=90");    // 세로: 90도 돌려서 꽉 채움
+        }
         options.add("--avcodec-fast");         // SW 디코딩 속도 향상
         options.add("--avcodec-skiploopfilter=2"); // 화질 감소 cpu 부하 감소
         options.add("--drop-late-frames"); // 지연 누적 방지
@@ -79,8 +87,8 @@ public class camera extends AppCompatActivity {
         lastProgressAt = SystemClock.elapsedRealtime();
 
         Media media = new Media(libVLC, Uri.parse(streamUrl));
-        // true면 회전이 안됨
-        media.setHWDecoderEnabled(false, false);
+        // 하드웨어 디코딩은 회전 필터와 같이 못 씀 → 가로(회전 없음)일 때만 켬
+        media.setHWDecoderEnabled(!isPortrait, false);
         mediaPlayer.setMedia(media);
         media.release();
         mediaPlayer.play();

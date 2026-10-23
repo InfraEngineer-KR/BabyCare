@@ -197,7 +197,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="28dp"
-                        android:text="최근 수면"
+                        android:text="수면 환경"
                         android:textColor="#4B626A"
                         android:textSize="20sp"
                         app:layout_constraintStart_toStartOf="parent"

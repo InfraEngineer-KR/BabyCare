@@ -8,6 +8,8 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.graphics.Color;
+import android.content.res.ColorStateList;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -29,6 +31,8 @@ public class EnvironmentActivity extends AppCompatActivity {
     private TextView tvNoDevice;
     private TextView tvCurrentTemp;
     private TextView tvCurrentHumid;
+    private TextView tvTempBadge;
+    private TextView tvHumidBadge;
     private Switch switchAutoControl;
 
     private String accessToken = "";
@@ -49,7 +53,15 @@ public class EnvironmentActivity extends AppCompatActivity {
         tvNoDevice       = findViewById(R.id.tvNoDevice);
         tvCurrentTemp    = findViewById(R.id.tvCurrentTemp);
         tvCurrentHumid   = findViewById(R.id.tvCurrentHumid);
+        tvTempBadge      = findViewById(R.id.tvTempBadge);
+        tvHumidBadge     = findViewById(R.id.tvHumidBadge);
         switchAutoControl = findViewById(R.id.switchAutoControl);
+
+        // 자동제어 토글 색: 켜짐 파랑 / 꺼짐 회색
+        switchAutoControl.setTrackTintList(new ColorStateList(
+                new int[][]{ {android.R.attr.state_checked}, {} },
+                new int[]{ Color.parseColor("#4A90E2"), Color.parseColor("#C4C9CC") }
+        ));
 
         ImageButton btnBack = findViewById(R.id.btnBack);
 
@@ -136,6 +148,8 @@ public class EnvironmentActivity extends AppCompatActivity {
                             currentHumid = response.body().humidity;
                             tvCurrentTemp.setText(String.format("%.1f°C", currentTemp));
                             tvCurrentHumid.setText(String.format("%.1f%%", currentHumid));
+                            showTempBadge(currentTemp);
+                            showHumidBadge(currentHumid);
                         }
                         loadDevices();
                     }
@@ -147,7 +161,33 @@ public class EnvironmentActivity extends AppCompatActivity {
                     }
                 });
     }
+    // 영유아 권장 실내 온도 (18/28도는 서버 경고 기준과 동일)
+    private void showTempBadge(double temp) {
+        String text;
+        if (temp < 18) text = "추움";
+        else if (temp < 20) text = "서늘함";
+        else if (temp <= 24) text = "쾌적함";
+        else if (temp < 28) text = "따뜻함";
+        else text = "더움";
 
+        tvTempBadge.setText(text);
+        tvTempBadge.setTextColor(text.equals("쾌적함")
+                ? Color.parseColor("#4B626A")    // 원래 색
+                : Color.parseColor("#D9822B"));  // 주의 (주황)
+    }
+
+    // 영유아 권장 실내 습도 40~60%
+    private void showHumidBadge(double humid) {
+        String text;
+        if (humid < 40) text = "건조함";
+        else if (humid <= 60) text = "적정";
+        else text = "습함";
+
+        tvHumidBadge.setText(text);
+        tvHumidBadge.setTextColor(text.equals("적정")
+                ? Color.parseColor("#795D43")    // 원래 색
+                : Color.parseColor("#D9822B"));  // 주의 (주황)
+    }
     private void loadDevices() {
         apiService.getDevices("Bearer " + accessToken)
                 .enqueue(new Callback<AuthModels.DeviceResponse>() {

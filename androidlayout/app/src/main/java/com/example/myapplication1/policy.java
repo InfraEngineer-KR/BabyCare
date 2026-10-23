@@ -28,6 +28,7 @@ public class policy extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_policy);
+        findViewById(R.id.btn_back).setOnClickListener(v -> finish());  // 추가
 
         // 툴바의 전체홈 버튼 (필요할 경우)
         TextView btnWeb = findViewById(R.id.btn_web);

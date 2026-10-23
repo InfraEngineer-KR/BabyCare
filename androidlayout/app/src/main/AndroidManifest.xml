@@ -28,7 +28,8 @@
         <activity android:name=".ResetPasswordActivity" android:exported="false" />
         <activity android:name=".policyDetail" android:exported="false" />
         <activity android:name=".userexplore" android:exported="false" />
-        <activity android:name=".camera" android:exported="false" />
+        <activity android:name=".camera" android:exported="false"
+            android:screenOrientation="sensor" />
         <activity android:name=".mypage" android:exported="false" />
         <activity android:name=".EnvironmentActivity" android:exported="false" />
         <activity android:name=".report" android:exported="false" />

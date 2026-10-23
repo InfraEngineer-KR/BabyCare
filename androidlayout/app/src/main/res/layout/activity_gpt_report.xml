@@ -107,7 +107,8 @@
                 android:lineSpacingExtra="5dp"
                 android:text="아이들은 저녁 시간에 다소 뒤척였지만, 새벽에는 안정적인 모습을 보였습니다. 아이의 수면에 영향을 준 주된 환경 요인들을 살펴볼까요?"
                 android:textColor="#42484A"
-                android:textSize="14sp" />
+                android:textSize="14sp"
+                android:visibility="gone" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/cardReportScore"
@@ -197,7 +198,7 @@
                     <TextView style="@style/ReportMetricIconStyle" android:text="♨" />
                     <LinearLayout style="@style/ReportMetricTextGroupStyle">
                         <TextView style="@style/ReportMetricLabelStyle" android:text="평균 온도" />
-                        <TextView style="@style/ReportMetricValueStyle" android:text="20°C" />
+                        <TextView android:id="@+id/tvAvgTemp" style="@style/ReportMetricValueStyle" android:text="20°C" />
                     </LinearLayout>
                 </LinearLayout>
 
@@ -205,7 +206,7 @@
                     <TextView style="@style/ReportMetricIconStyle" android:text="♢" />
                     <LinearLayout style="@style/ReportMetricTextGroupStyle">
                         <TextView style="@style/ReportMetricLabelStyle" android:text="습도" />
-                        <TextView style="@style/ReportMetricValueStyle" android:text="60%" />
+                        <TextView android:id="@+id/tvAvgHumidity" style="@style/ReportMetricValueStyle" android:text="60%" />
                     </LinearLayout>
                 </LinearLayout>
 
@@ -213,7 +214,7 @@
                     <TextView style="@style/ReportMetricIconStyle" android:text="◉" />
                     <LinearLayout style="@style/ReportMetricTextGroupStyle">
                         <TextView style="@style/ReportMetricLabelStyle" android:text="소음 수준" />
-                        <TextView style="@style/ReportMetricValueStyle" android:text="50dB" />
+                        <TextView android:id="@+id/tvAvgNoise" style="@style/ReportMetricValueStyle" android:text="50dB" />
                     </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
@@ -230,7 +231,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="▥  수면 패턴 분석"
+                    android:text="▥  수면 상태 분석"
                     android:textColor="#181C20"
                     android:textSize="17sp"
                     android:textStyle="bold" />
@@ -258,17 +259,18 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="⊘  수면 환경 분석"
+                    android:text="⊘  환경 상태 분석"
                     android:textColor="#181C20"
                     android:textSize="17sp"
                     android:textStyle="bold" />
 
                 <TextView
+                    android:id="@+id/tvEnvAnalysis"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="18dp"
                     android:lineSpacingExtra="5dp"
-                    android:text="온도와 습도는 신생아에게 적정한 범위였습니다. 다만, 소음 수준이 50dB로 다소 높습니다. 지속적인 소음은 얕은 잠 단계에서 잠을 방해할 수 있으므로 백색 소음기 사용을 고려해 보세요."
+                    android:text="온도와 습도는 신생아에게 적정한 범위였습니다. ..."
                     android:textColor="#42484A"
                     android:textSize="14sp" />
             </LinearLayout>
@@ -295,9 +297,9 @@
                     android:textSize="28sp"
                     android:textStyle="bold" />
 
-                <TextView style="@style/ReportGuideStepStyle" android:text="1    주변 소음 최소화하기\n외부 소음을 줄이고 필요한 경우 백색 소음기를 사용하여 일정한 청각적 보호막을 만들어주세요." />
-                <TextView style="@style/ReportGuideStepStyle" android:text="2    취침 의식 만들기\n자기 전 부드러운 목소리로 대화하거나 잔잔한 음악을 들려주어 아이가 정서적으로 안정될 느끼게 해주세요." />
-                <TextView style="@style/ReportGuideStepStyle" android:text="3    침구의 편안함 확인\n침구가 포근하고 온도에 적합한지 확인하여 아이들이 안정감을 느끼며 잘 수 있도록 도와주세요." />
+                <TextView android:id="@+id/tvCareGuide" style="@style/ReportGuideStepStyle" android:text="1    주변 소음 최소화하기\n외부 소음을 줄이고 필요한 경우 백색 소음기를 사용하여 일정한 청각적 보호막을 만들어주세요." />
+                <TextView android:visibility="gone" style="@style/ReportGuideStepStyle" android:text="2    취침 의식 만들기\n자기 전 부드러운 목소리로 대화하거나 잔잔한 음악을 들려주어 아이가 정서적으로 안정될 느끼게 해주세요." />
+                <TextView android:visibility="gone" style="@style/ReportGuideStepStyle" android:text="3    침구의 편안함 확인\n침구가 포근하고 온도에 적합한지 확인하여 아이들이 안정감을 느끼며 잘 수 있도록 도와주세요." />
 
                 <FrameLayout
                     android:id="@+id/reportGuideImage"
