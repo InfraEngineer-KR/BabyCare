@@ -1,6 +1,17 @@
 const TemperHumility = require('../models/TemperHumility');
 const { calcScore } = require('./sleepController');
 
+const mqtt = require('mqtt');
+
+// 라즈베리파이 LED용 경고 신호 (baby/alert)
+const alertClient = mqtt.connect(`mqtt://${process.env.MQTT_HOST || 'localhost'}:1883`);
+alertClient.on('error', (err) => console.error('[경고 MQTT] 오류:', err.message));
+
+const publishAlert = (type, message) => {
+    if (!alertClient.connected) return;
+    alertClient.publish('baby/alert', JSON.stringify({ type, message, timestamp: Date.now() }));
+};
+
 const TEMP_HIGH = 28;
 const TEMP_LOW = 18;
 const RAPID_TEMP_CHANGE = 3;
@@ -25,6 +36,7 @@ const checkDangerCondition = async (userId, temperature, io, previous) => {
 
         if (temperature >= TEMP_HIGH) {
             console.log(`[고온 감지] ${temperature}도`);
+            publishAlert('HIGH_TEMPERATURE', `고온 ${temperature}°C`);   
             if (io) {
                 io.to(userId).emit('temperatureAlert', {
                     type: 'HIGH_TEMPERATURE',
@@ -37,6 +49,7 @@ const checkDangerCondition = async (userId, temperature, io, previous) => {
 
         if (temperature <= TEMP_LOW) {
             console.log(`[저온 감지] ${temperature}도`);
+            publishAlert('LOW_TEMPERATURE', `저온 ${temperature}°C`); 
             if (io) {
                 io.to(userId).emit('temperatureAlert', {
                     type: 'LOW_TEMPERATURE',
@@ -52,6 +65,7 @@ const checkDangerCondition = async (userId, temperature, io, previous) => {
 
             if (diff >= RAPID_TEMP_CHANGE) {
                 console.log(`[온도 급상승] ${latest.temperature} → ${temperature}`);
+                publishAlert('RAPID_TEMP_RISE', `급상승 ${diff.toFixed(1)}°C`);
                 if (io) {
                     io.to(userId).emit('temperatureAlert', {
                         type: 'RAPID_TEMP_RISE',
@@ -66,6 +80,7 @@ const checkDangerCondition = async (userId, temperature, io, previous) => {
 
             if (diff <= -RAPID_TEMP_CHANGE) {
                 console.log(`[온도 급하락] ${latest.temperature} → ${temperature}`);
+                publishAlert('RAPID_TEMP_DROP', `급하락 ${Math.abs(diff).toFixed(1)}°C`);
                 if (io) {
                     io.to(userId).emit('temperatureAlert', {
                         type: 'RAPID_TEMP_DROP',
@@ -237,8 +252,11 @@ exports.saveCryEvent = async function(userId, cryProbability, io) {
 
     // 2. 알림 (DB 결과와 상관없이 보냄, 쿨다운 적용)
     const now = Date.now();
-    if (!io || now - lastCryAlertAt < CRY_ALERT_COOLDOWN_MS) return;
+    if (now - lastCryAlertAt < CRY_ALERT_COOLDOWN_MS) return;
     lastCryAlertAt = now;
+
+    publishAlert('CRY_DETECTED', '울음 감지');
+    if (!io) return;
 
     const percent = cryProbability != null
         ? `${(cryProbability * 100).toFixed(1)}%`
