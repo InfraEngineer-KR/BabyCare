@@ -26,7 +26,7 @@ class VideoEngine:
         )
         det_options = vision.FaceDetectorOptions(
             base_options=base_options,
-            min_detection_confidence=0.7,
+            min_detection_confidence=0.5,
         )
         self.face_detector = vision.FaceDetector.create_from_options(det_options)
 
@@ -38,8 +38,8 @@ class VideoEngine:
         print("✅ [VideoEngine] 모델 로드 완료")
 
         # 추후 매핑값으로 변경해 사용
-        camera_points = np.float32([[0,0], [1280,0], [0,720], [1280,720]])
-        thermal_points = np.float32([[0,0], [32,0], [0,24], [32,24]])
+        camera_points = np.float32([[0, 0], [1280, 0], [0, 720], [1280, 720]])
+        thermal_points = np.float32([[40.441, -19.748], [-24.878, -12.697], [40.144, 22.022], [-25.175, 29.073]])
         self.H, _ = cv2.findHomography(camera_points, thermal_points)
 
     def analyze(self, batch_frames, thermal_frame):
@@ -66,7 +66,7 @@ class VideoEngine:
 
                 for det in result.detections:
                     det_conf = det.categories[0].score
-                    if det_conf < 0.7:
+                    if det_conf < 0.5:
                         continue
 
                     # 키포인트 기준 박스 + 마진 20퍼 
@@ -120,8 +120,11 @@ class VideoEngine:
                 pts = np.float32([[x1,y1], [x2,y1], [x1,y2], [x2,y2]]).reshape(-1,1,2)
                 dst = cv2.perspectiveTransform(pts, self.H)
 
-                tx1, ty1 = int(dst[0][0][0]), int(dst[0][0][1])
-                tx2, ty2 = int(dst[3][0][0]), int(dst[3][0][1])
+                # tx1, ty1 = int(dst[0][0][0]), int(dst[0][0][1])
+                # tx2, ty2 = int(dst[3][0][0]), int(dst[3][0][1])
+                xs, ys = dst[:, 0, 0], dst[:, 0, 1]
+                tx1, tx2 = int(np.floor(xs.min())), int(np.ceil(xs.max()))
+                ty1, ty2 = int(np.floor(ys.min())), int(np.ceil(ys.max()))
 
                 th, tw = thermal_frame.shape[:2]
                 tx1 = max(0, min(tx1, tw - 1))
@@ -131,7 +134,7 @@ class VideoEngine:
 
                 if tx1 < tx2 and ty1 < ty2:
                     region = thermal_frame[ty1:ty2, tx1:tx2]
-                    temps = region[(region >= 20.0) & (region <= 40.0)]
+                    temps = region[(region >= 34.0) & (region <= 40.0)]
                     if len(temps) > 0:
                         estimated_temp = round(float(np.mean(temps)), 2)
 
