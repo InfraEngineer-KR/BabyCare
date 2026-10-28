@@ -1,5 +1,7 @@
 package com.example.myapplication1;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
@@ -19,6 +21,7 @@ import java.util.List;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 import androidx.annotation.NonNull;
 
@@ -262,6 +265,7 @@ public class Menuactivity extends AppCompatActivity {
 
                     String when = v.dDay == 0 ? "오늘" : "D-" + v.dDay;
                     tvVaccineSubtitle.setText(when + " · " + v.name + " " + v.degree + "차");
+                    notifyVaccineOncePerDay(v);
                     return;
                 }
                 tvVaccineSubtitle.setText("예정된 접종이 없어요");
@@ -272,6 +276,41 @@ public class Menuactivity extends AppCompatActivity {
                 tvVaccineSubtitle.setText("서버 연결 실패");
             }
         });
+    }
+
+    // 접종 알림: 7일 이내 접종이 있을 때, 하루에 한 번만 (그날 처음 홈 화면을 열 때)
+    private void notifyVaccineOncePerDay(AuthModels.VaccineResponse v) {
+        if (v.dDay > 7) return;
+
+        SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+        String today = new SimpleDateFormat("yyyy-MM-dd", Locale.KOREA).format(new Date());
+        if (today.equals(prefs.getString("vaccineNotifiedDate", ""))) return;   // 오늘 이미 보냄
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+                && ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+
+        NotificationManager manager = getSystemService(NotificationManager.class);
+        if (manager == null) return;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            manager.createNotificationChannel(new NotificationChannel(
+                    "vaccine_daily", "예방접종 알림", NotificationManager.IMPORTANCE_DEFAULT));
+        }
+
+        String text = v.dDay == 0
+                ? "오늘 " + v.name + " " + v.degree + "차 접종일이에요"
+                : "D-" + v.dDay + " · " + v.name + " " + v.degree + "차 (" + v.dueDate + ")";
+
+        manager.notify(2001, new NotificationCompat.Builder(this, "vaccine_daily")
+                .setSmallIcon(android.R.drawable.ic_dialog_info)
+                .setContentTitle("예방접종 알림")
+                .setContentText(text)
+                .setAutoCancel(true)
+                .build());
+
+        prefs.edit().putString("vaccineNotifiedDate", today).apply();
     }
     // 수면 환경 점수(0~100) → 등급
     // 울음 감지 시 항상 55점 이하 → "주의", 온도 경고(18/28도) 수준이면 "보통" 이하

@@ -13,7 +13,7 @@
         android:layout_height="0dp"
         android:clipToPadding="false"
         android:fillViewport="true"
-        android:paddingBottom="104dp"
+        android:paddingBottom="24dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -214,43 +214,13 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:fontFamily="sans-serif-medium"
-                    android:text="수면 점수 추이"
+                    android:text="최근 24시간 수면 점수"
                     android:textColor="#184C5A"
                     android:textSize="20sp"
                     android:textStyle="bold"
-                    app:layout_constraintEnd_toStartOf="@id/trendToggleGroup"
+                    app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
-
-                <LinearLayout
-                    android:id="@+id/trendToggleGroup"
-                    android:layout_width="wrap_content"
-                    android:layout_height="32dp"
-                    android:gravity="center"
-                    android:orientation="horizontal"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent">
-
-                    <TextView
-                        android:layout_width="44dp"
-                        android:layout_height="28dp"
-                        android:background="@drawable/bg_sleep_toggle_unselected"
-                        android:gravity="center"
-                        android:text="일간"
-                        android:textColor="#72787A"
-                        android:textSize="12sp" />
-
-                    <TextView
-                        android:layout_width="44dp"
-                        android:layout_height="28dp"
-                        android:layout_marginStart="8dp"
-                        android:background="@drawable/bg_sleep_toggle_selected"
-                        android:gravity="center"
-                        android:text="주간"
-                        android:textColor="#FFFFFF"
-                        android:textSize="12sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
 
                 <FrameLayout
                     android:id="@+id/chartShell"
@@ -281,7 +251,8 @@
                 android:paddingStart="36dp"
                 android:paddingTop="34dp"
                 android:paddingEnd="36dp"
-                android:paddingBottom="28dp">
+                android:paddingBottom="28dp"
+                android:visibility="gone">
 
                 <TextView
                     android:id="@+id/tvInsightIcon"
@@ -386,6 +357,7 @@
         android:orientation="horizontal"
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <TextView style="@style/SleepBottomNavItemStyle" android:text="⌂\n홈" />

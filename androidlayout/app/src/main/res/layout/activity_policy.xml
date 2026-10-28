@@ -88,6 +88,7 @@
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cv_search"
+        android:visibility="gone"
         android:layout_width="0dp"
         android:layout_height="46dp"
         android:layout_marginStart="20dp"
@@ -119,7 +120,7 @@
         android:clipToPadding="false"
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
-        android:paddingBottom="256dp"
+        android:paddingBottom="196dp"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/cv_search" />
@@ -131,7 +132,7 @@
         android:minHeight="156dp"
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
-        android:layout_marginBottom="112dp"
+        android:layout_marginBottom="24dp"
         android:background="@drawable/bg_policy_hero_card"
         android:gravity="center_vertical"
         android:orientation="vertical"
@@ -171,6 +172,7 @@
         android:orientation="horizontal"
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <TextView style="@style/SleepBottomNavItemStyle" android:text="⌂\n홈" />

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- 연결된 기기 카드 (환경 화면 온습도 카드와 같은 흰 카드 + 청회색 알약 버튼) -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:layout_marginBottom="24dp"
-    android:background="@drawable/bg_rounded_input"
-    android:backgroundTint="#FFFFFF"
-    android:padding="30dp">
+    android:layout_marginBottom="16dp"
+    android:background="@drawable/bg_smartthings_white_card"
+    android:padding="24dp">
 
     <!-- 기기 이름 -->
     <TextView
@@ -16,49 +16,69 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="기기 이름"
-        android:textColor="#2D3250"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="20dp" />
+        android:textColor="#181C20"
+        android:textSize="20sp"
+        android:textStyle="bold" />
 
-    <!-- 온오프 버튼 -->
-    <Button
-        android:id="@+id/btnOnOff"
+    <!-- 전원 / AUTO (AUTO가 없는 기기는 전원 버튼이 한 줄을 다 씀) -->
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:layout_marginBottom="16dp"
-        android:text="ON"
-        android:textColor="#FFFFFF"
-        android:backgroundTint="#2D3250"
-        android:visibility="gone" />
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:orientation="horizontal">
 
-    <!-- AUTO 버튼 -->
-    <Button
-        android:id="@+id/btnAuto"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:layout_marginBottom="16dp"
-        android:text="AUTO"
-        android:textColor="#FFFFFF"
-        android:backgroundTint="#9DA4BC"
-        android:visibility="gone" />
+        <Button
+            android:id="@+id/btnOnOff"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:stateListAnimator="@null"
+            android:text="OFF"
+            android:textAllCaps="false"
+            android:textColor="#4B626A"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:backgroundTint="#E7F0F3"
+            app:cornerRadius="24dp"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/btnAuto"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:layout_marginStart="12dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:stateListAnimator="@null"
+            android:text="AUTO"
+            android:textAllCaps="false"
+            android:textColor="#4B626A"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:backgroundTint="#E7F0F3"
+            app:cornerRadius="24dp"
+            android:visibility="gone" />
+    </LinearLayout>
 
     <!-- 팬 단계 행 (1~3단계) -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:layout_marginBottom="16dp">
+        android:gravity="center_vertical">
 
         <TextView
             android:id="@+id/tvFanSpeed"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:layout_marginTop="12dp"
             android:text="단계: --"
-            android:textColor="#2D3250"
-            android:textSize="48sp"
+            android:textColor="#4B626A"
+            android:textSize="18sp"
             android:textStyle="bold"
             android:visibility="gone" />
 
@@ -66,19 +86,21 @@
             android:id="@+id/btnFanDown"
             android:layout_width="48dp"
             android:layout_height="48dp"
+            android:layout_marginTop="12dp"
             android:layout_marginEnd="8dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/outline_arrow_downward_alt_24"
-            app:tint="#2D3250"
+            app:tint="#4B626A"
             android:visibility="gone" />
 
         <ImageButton
             android:id="@+id/btnFanUp"
             android:layout_width="48dp"
             android:layout_height="48dp"
+            android:layout_marginTop="12dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/outline_arrow_upward_alt_24"
-            app:tint="#2D3250"
+            app:tint="#4B626A"
             android:visibility="gone" />
     </LinearLayout>
 
@@ -94,9 +116,10 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:layout_marginTop="12dp"
             android:text="설정: --°C"
-            android:textColor="#2D3250"
-            android:textSize="48sp"
+            android:textColor="#4B626A"
+            android:textSize="18sp"
             android:textStyle="bold"
             android:visibility="gone" />
 
@@ -104,19 +127,21 @@
             android:id="@+id/btnTempDown"
             android:layout_width="48dp"
             android:layout_height="48dp"
+            android:layout_marginTop="12dp"
             android:layout_marginEnd="8dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/outline_arrow_downward_alt_24"
-            app:tint="#2D3250"
+            app:tint="#4B626A"
             android:visibility="gone" />
 
         <ImageButton
             android:id="@+id/btnTempUp"
             android:layout_width="48dp"
             android:layout_height="48dp"
+            android:layout_marginTop="12dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/outline_arrow_upward_alt_24"
-            app:tint="#2D3250"
+            app:tint="#4B626A"
             android:visibility="gone" />
     </LinearLayout>
 

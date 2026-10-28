@@ -226,6 +226,7 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.DeviceView
             if (status.switchValue != null) {
                 boolean isOn = "on".equals(status.switchValue);
                 holder.btnOnOff.setText(isOn ? "ON" : "OFF");
+                setPill(holder.btnOnOff, isOn);
 
                 if (isOn && fanSpeeds[position] != null) {
                     int speed = fanSpeeds[position];
@@ -235,16 +236,14 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.DeviceView
                         holder.btnFanUp.setVisibility(View.VISIBLE);
                         holder.btnFanDown.setVisibility(View.VISIBLE);
                         holder.tvFanSpeed.setText("단계: AUTO");
-                        holder.btnAuto.setBackgroundTintList(
-                                android.content.res.ColorStateList.valueOf(0xFF2D3250));
+                        setPill(holder.btnAuto, true);
                     } else {
                         // 1~3단계 표시 (fanSpeed 2=1단계, 3=2단계, 4=3단계)
                         holder.tvFanSpeed.setVisibility(View.VISIBLE);
                         holder.btnFanUp.setVisibility(View.VISIBLE);
                         holder.btnFanDown.setVisibility(View.VISIBLE);
                         holder.tvFanSpeed.setText("단계: " + (speed - 1));
-                        holder.btnAuto.setBackgroundTintList(
-                                android.content.res.ColorStateList.valueOf(0xFF9DA4BC));
+                        setPill(holder.btnAuto, false);
                     }
                 } else {
                     holder.tvFanSpeed.setVisibility(View.GONE);
@@ -260,6 +259,13 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.DeviceView
                 holder.tvTempValue.setText(String.format("설정: %.0f°C", status.coolingSetpoint));
             }
         });
+    }
+
+    // 켜짐/AUTO 선택: 진한 청회색 + 흰 글자 / 해제: 연한 배경 + 청회색 글자 (환경 화면 색과 통일)
+    private void setPill(Button button, boolean selected) {
+        button.setBackgroundTintList(android.content.res.ColorStateList.valueOf(
+                selected ? 0xFF4B626A : 0xFFE7F0F3));
+        button.setTextColor(selected ? 0xFFFFFFFF : 0xFF4B626A);
     }
 
     @Override

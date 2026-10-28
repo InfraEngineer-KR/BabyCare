@@ -195,10 +195,12 @@ public class Schedule extends AppCompatActivity {
             // 앱 196번째 줄 주석을 풉니다.
             // cardUpcomingSummary.setOnClickListener(v -> showEditDialog(next));
 
-            sendNotification(
-                    "접종 알림",
-                    "다가오는 접종 일정이 " + vaccineList.size() + "건 있습니다."
-            );
+            // 하루 한 번 알림은 홈 화면(Menuactivity)에서 보내므로 여기서는 보내지 않음
+            // (화면을 열 때마다 알림이 쌓이던 문제)
+            // sendNotification(
+            //         "접종 알림",
+            //         "다가오는 접종 일정이 " + vaccineList.size() + "건 있습니다."
+            // );
 
         } else {
             tvNextVaccineDate.setText("현재 예정된 접종이 없습니다.");

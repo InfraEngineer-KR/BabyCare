@@ -105,6 +105,7 @@
 
             <TextView
                 android:id="@+id/label_name"
+                android:visibility="gone"
                 style="@style/ProfileFieldLabelStyle"
                 android:layout_marginTop="56dp"
                 android:text="성함"
@@ -112,6 +113,7 @@
 
             <EditText
                 android:id="@+id/et_edit_name"
+                android:visibility="gone"
                 style="@style/ProfileEditTextStyle"
                 android:layout_marginTop="16dp"
                 android:hint="Elena Rivers"
@@ -121,7 +123,7 @@
             <TextView
                 android:id="@+id/label_baby_birth"
                 style="@style/ProfileFieldLabelStyle"
-                android:layout_marginTop="28dp"
+                android:layout_marginTop="56dp"
                 android:text="아이 생일"
                 app:layout_constraintTop_toBottomOf="@id/et_edit_name" />
 
@@ -194,6 +196,7 @@
 
             <TextView
                 android:id="@+id/label_guardian"
+                android:visibility="gone"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="52dp"
@@ -208,6 +211,7 @@
 
             <ImageButton
                 android:id="@+id/btn_add_guardian"
+                android:visibility="gone"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:background="@drawable/bg_profile_add_button"
@@ -222,6 +226,7 @@
 
             <LinearLayout
                 android:id="@+id/layout_guardian_list"
+                android:visibility="gone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="26dp"

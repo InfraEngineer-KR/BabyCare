@@ -29,6 +29,8 @@ public class EnvironmentActivity extends AppCompatActivity {
 
     private RecyclerView rvDevices;
     private TextView tvNoDevice;
+    private View emptyDeviceContent;   // 기기 없을 때 안내 화면 (아이콘, 문구, 기기 찾기 버튼)
+    private View devicePanel;          // 연결된 기기 영역 (기기 없을 땐 점선 박스)
     private TextView tvCurrentTemp;
     private TextView tvCurrentHumid;
     private TextView tvTempBadge;
@@ -51,6 +53,12 @@ public class EnvironmentActivity extends AppCompatActivity {
 
         rvDevices        = findViewById(R.id.rvDevices);
         tvNoDevice       = findViewById(R.id.tvNoDevice);
+        emptyDeviceContent = findViewById(R.id.emptyDeviceContent);
+        devicePanel      = findViewById(R.id.devicePanel);
+
+        // 기기 찾기 → 마이페이지 (SmartThings 토큰 등록)
+        findViewById(R.id.btnFindDevice).setOnClickListener(v ->
+                startActivity(new Intent(this, mypage.class)));
         tvCurrentTemp    = findViewById(R.id.tvCurrentTemp);
         tvCurrentHumid   = findViewById(R.id.tvCurrentHumid);
         tvTempBadge      = findViewById(R.id.tvTempBadge);
@@ -211,10 +219,20 @@ public class EnvironmentActivity extends AppCompatActivity {
                             deviceAdapter.setAutoControl(switchAutoControl.isChecked());
 
                             rvDevices.setAdapter(deviceAdapter);
-                            tvNoDevice.setVisibility(View.GONE);
+                            // 기기 있음: 목록만 보이게
+                            emptyDeviceContent.setVisibility(View.GONE);
+                            rvDevices.setVisibility(View.VISIBLE);
+
+                            // 점선 박스·최소 높이 제거 → 기기 카드 개수만큼만 차지
+                            devicePanel.setBackground(null);
+                            devicePanel.setMinimumHeight(0);
+                            devicePanel.setPadding(0, 0, 0, 0);
 
                         } else {
+                            // 기기 없음: 안내 화면만 보이게
                             tvNoDevice.setVisibility(View.VISIBLE);
+                            emptyDeviceContent.setVisibility(View.VISIBLE);
+                            rvDevices.setVisibility(View.GONE);
                             Toast.makeText(EnvironmentActivity.this,
                                     "연동된 기기가 없습니다.",
                                     Toast.LENGTH_SHORT).show();
@@ -224,6 +242,8 @@ public class EnvironmentActivity extends AppCompatActivity {
                     @Override
                     public void onFailure(@NonNull Call<AuthModels.DeviceResponse> call, @NonNull Throwable t) {
                         Log.e(TAG, "디바이스 목록 실패: " + t.getMessage());
+                        emptyDeviceContent.setVisibility(View.VISIBLE);
+                        rvDevices.setVisibility(View.GONE);
                         Toast.makeText(EnvironmentActivity.this,
                                 "서버 연결 실패",
                                 Toast.LENGTH_SHORT).show();

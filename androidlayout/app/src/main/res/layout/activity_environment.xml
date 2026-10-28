@@ -13,7 +13,7 @@
         android:layout_height="0dp"
         android:clipToPadding="false"
         android:fillViewport="true"
-        android:paddingBottom="104dp"
+        android:paddingBottom="24dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -321,7 +321,7 @@
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rvDevices"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:clipToPadding="false" />
             </FrameLayout>
 
@@ -383,6 +383,7 @@
         android:orientation="horizontal"
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <TextView style="@style/SleepBottomNavItemStyle" android:text="⌂\n홈" />

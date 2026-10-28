@@ -42,8 +42,8 @@ public class camera extends AppCompatActivity {
         VLCVideoLayout playerView = findViewById(R.id.playerView);
 
         ArrayList<String> options = new ArrayList<>();
-        options.add("--network-caching=150");
-        options.add("--live-caching=150");
+        options.add("--adaptive-livedelay=2000");   // 실시간보다 2초 뒤에서 재생 (기본 15초)
+        options.add("--adaptive-maxbuffer=4000");   // 미리 받아둘 최대 4초 (기본 30초)
         options.add("--clock-jitter=0");
         options.add("--clock-synchro=0");
         // 폰을 돌리면 화면이 새로 만들어지므로, 그때마다 방향에 맞게 설정
