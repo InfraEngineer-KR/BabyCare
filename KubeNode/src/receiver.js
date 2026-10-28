@@ -142,8 +142,8 @@ function startHlsFfmpeg() {
         '-c:v', 'copy',
         '-c:a', 'copy',
         '-f', 'hls',
-        '-hls_time', '2',
-        '-hls_list_size', '5',
+        '-hls_time', '1',
+        '-hls_list_size', '3',
         // omit_endlist: ffmpeg가 죽어도 '방송 끝' 표시 안 씀 (플레이어가 재생 종료로 판단하지 않게)
         '-hls_flags', 'delete_segments+append_list+omit_endlist',
         // 재시작해도 세그먼트 번호가 계속 증가하도록 (플레이어가 이미 본 번호로 착각하지 않게)
