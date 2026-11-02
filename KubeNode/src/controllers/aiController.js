@@ -15,6 +15,7 @@ const USE_SAMPLE_REPORT = false;
 
 const REPORT_TYPE = "아침 수면 종합 리포트";
 const NOISE_DB_OFFSET = 80; // 소음 보정값 (앱 GrapeActivity와 동일: dBFS + 80)
+const NOISE_MIN_DB = 20;    // 평균 소음이 이보다 낮으면 GPT에 숫자 대신 "매우 조용함"으로 전달 (앱 표시 기준과 동일)
 const REPORT_HOURS = 12;    // 리포트 분석 기간 (최근 12시간)
 
 // 예시 데이터 (전날 데이터를 못 쌓았을 때 사용)
@@ -69,6 +70,13 @@ const client = new OpenAI({
 
 // [공통] GPT 호출 함수
 const generateAiReport = async (data) => {
+    // 소음이 기준 미만이면 숫자 대신 문구로 전달 (-20dB 같은 값이 리포트에 나오지 않게)
+    const promptData = {
+        ...data,
+        avgNoise: (typeof data.avgNoise === "number" && data.avgNoise < NOISE_MIN_DB)
+            ? `${NOISE_MIN_DB}dB 미만 (매우 조용함)`
+            : data.avgNoise
+    };
     const prompt = `
 ### [역할 정의]
 너는 신생아 수면 환경 데이터를 분석하고, 보호자가 이해하기 쉬운 리포트를 작성하는 전문가다.
@@ -97,7 +105,7 @@ const generateAiReport = async (data) => {
 (특이사항 요약 및 오늘 밤 개선할 점 제안)
 
 ### [입력 데이터 (통계 요약)]
-${JSON.stringify(data, null, 2)}
+${JSON.stringify(promptData, null, 2)}
 `;
 
     const response = await client.chat.completions.create({
