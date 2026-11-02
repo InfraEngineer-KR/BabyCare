@@ -360,6 +360,73 @@
                 android:animateLayoutChanges="true"
                 android:orientation="vertical"
                 app:layout_constraintTop_toBottomOf="@id/item_empty_device" />
+
+            <TextView
+                android:id="@+id/label_body_temp"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="50dp"
+                android:fontFamily="sans-serif-medium"
+                android:text="체온 보정"
+                android:textColor="#4B626A"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/layout_device_list" />
+
+            <TextView
+                android:id="@+id/tv_body_temp_status"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="26dp"
+                android:background="@drawable/bg_profile_smartthings_card"
+                android:lineSpacingExtra="4dp"
+                android:paddingStart="28dp"
+                android:paddingTop="24dp"
+                android:paddingEnd="28dp"
+                android:paddingBottom="24dp"
+                android:text="불러오는 중..."
+                android:textColor="#4B626A"
+                android:textSize="15sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/label_body_temp" />
+
+            <LinearLayout
+                android:id="@+id/layout_body_temp_buttons"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:orientation="horizontal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tv_body_temp_status">
+
+                <Button
+                    android:id="@+id/btn_calibrate_now"
+                    android:layout_width="0dp"
+                    android:layout_height="52dp"
+                    android:layout_marginEnd="6dp"
+                    android:layout_weight="1"
+                    android:backgroundTint="#4B626A"
+                    android:text="지금 상태로 보정"
+                    android:textColor="#FFFFFF"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <Button
+                    android:id="@+id/btn_calibrate_days"
+                    android:layout_width="0dp"
+                    android:layout_height="52dp"
+                    android:layout_marginStart="6dp"
+                    android:layout_weight="1"
+                    android:backgroundTint="#E7F0F3"
+                    android:text="기간으로 보정"
+                    android:textColor="#4B626A"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>
 

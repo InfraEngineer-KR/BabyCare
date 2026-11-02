@@ -27,6 +27,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class GrapeActivity extends AppCompatActivity {
 
+    private static final double NOISE_MIN_DB = 20;   // 이보다 낮으면 "- dB"로 표시
+
     private LineChart sleepChart;
 
     private TextView tvSleepScore;
@@ -141,10 +143,12 @@ public class GrapeActivity extends AppCompatActivity {
                                     String.format("%.0f%%", data.humidity)
                             );
 
-                            if (data.noise != null) {
-                                tvNoise.setText(String.format("%.0f dB", data.noise+80));
-                            } else {
+                            if (data.noise == null) {
                                 tvNoise.setText("-- dB");
+                            } else if (data.noise + 80 >= NOISE_MIN_DB) {
+                                tvNoise.setText(String.format("%.0f dB", data.noise + 80));
+                            } else {
+                                tvNoise.setText(String.format("%.0fdB 미만 (매우 조용함)", NOISE_MIN_DB));
                             }
 
                             if (data.sleepScore != null && data.sleepScore >= 80) {

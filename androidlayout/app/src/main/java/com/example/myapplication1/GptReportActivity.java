@@ -20,6 +20,13 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class GptReportActivity extends AppCompatActivity {
 
+    private static final double NOISE_MIN_DB = 20;   // 이보다 낮으면 "20dB 미만 (매우 조용함)"으로 표시
+
+    private String formatNoise(double db) {
+        return db >= NOISE_MIN_DB
+                ? String.format(Locale.KOREA, "%.0fdB", db)
+                : String.format(Locale.KOREA, "%.0fdB 미만 (매우 조용함)", NOISE_MIN_DB);
+    }
     private static final String TAG = "GptReportActivity";
 
     private TextView tvReportTitle;
@@ -165,7 +172,7 @@ public class GptReportActivity extends AppCompatActivity {
         // 평균 온도 / 습도 / 소음 (소음은 서버에서 dB로 변환해서 줌)
         tvAvgTemp.setText(String.format(Locale.KOREA, "%.1f°C", data.avgTemp));
         tvAvgHumidity.setText(String.format(Locale.KOREA, "%.0f%%", data.avgHumidity));
-        tvAvgNoise.setText(String.format(Locale.KOREA, "%.0fdB", data.avgNoise));
+        tvAvgNoise.setText(formatNoise(data.avgNoise));
 
         String text = data.reportText;
 
@@ -260,8 +267,8 @@ public class GptReportActivity extends AppCompatActivity {
         StringBuilder sb = new StringBuilder();
         sb.append("[첫 걸음] ").append(toReportTitle(d.periodEnd)).append("\n\n");
         sb.append("수면 환경 점수: ").append(Math.round(d.avgScore)).append(" / 100\n");
-        sb.append(String.format(Locale.KOREA, "평균 온도 %.1f°C · 습도 %.0f%% · 소음 %.0fdB\n",
-                d.avgTemp, d.avgHumidity, d.avgNoise));
+        sb.append(String.format(Locale.KOREA, "평균 온도 %.1f°C · 습도 %.0f%% · 소음 %s\n",
+                d.avgTemp, d.avgHumidity, formatNoise(d.avgNoise)));
 
         if (d.reportText != null) {
             String summary = getSection(d.reportText, "전체 요약");

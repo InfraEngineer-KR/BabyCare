@@ -172,4 +172,29 @@ public interface ApiService {
      */
     @POST("api/ai/generate")
     Call<AuthModels.AiReportResponse> generateReport();
+
+    // =========================================================
+    // 6. 아기 정상 체온 보정
+    // =========================================================
+
+    /**
+     * 현재 정상 체온 조회
+     */
+    @GET("api/video/calibration")
+    Call<Map<String, Object>> getCalibration();
+
+    /**
+     * '기간으로 보정' 목록 (최근 날짜별 측정 개수 / 평균)
+     */
+    @GET("api/video/calibration/days")
+    Call<Map<String, Object>> getCalibrationDays();
+
+    /**
+     * 정상 체온 보정
+     * { mode: "now" } 또는 { mode: "days", days: [...] }
+     */
+    @POST("api/video/calibrate")
+    Call<Map<String, Object>> calibrate(
+            @Body Map<String, Object> body
+    );
 }
