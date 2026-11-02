@@ -47,4 +47,28 @@ router.get('/status', (req, res) => {
   videoController.getStreamStatus(req, res);
 });
 
+/**
+ * GET /api/video/calibration
+ * 현재 정상 체온 조회
+ */
+router.get('/calibration', (req, res) => {
+  videoController.getCalibration(req, res);
+});
+
+/**
+ * GET /api/video/calibration/days
+ * '기간으로 보정' 목록 (최근 날짜별 측정 개수 / 평균)
+ */
+router.get('/calibration/days', (req, res) => {
+  videoController.getCalibrationDays(req, res);
+});
+
+/**
+ * POST /api/video/calibrate
+ * 정상 체온 보정 ({ mode: 'now' } 또는 { mode: 'days', days: [...] })
+ */
+router.post('/calibrate', (req, res) => {
+  videoController.calibrate(req, res);
+});
+
 module.exports = router;

@@ -11,6 +11,7 @@ const publishAlert = (type, message) => {
     if (!alertClient.connected) return;
     alertClient.publish('baby/alert', JSON.stringify({ type, message, timestamp: Date.now() }));
 };
+exports.publishAlert = publishAlert;
 
 const TEMP_HIGH = 28;
 const TEMP_LOW = 18;
