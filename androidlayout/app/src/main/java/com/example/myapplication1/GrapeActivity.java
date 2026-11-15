@@ -27,6 +27,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class GrapeActivity extends AppCompatActivity {
 
+    private static final float VISIBLE_POINTS = 30;   // 그래프에 한 번에 보일 점 개수 (1분 단위 → 2시간)
     private static final double NOISE_MIN_DB = 20;   // 이보다 낮으면 "- dB"로 표시
 
     private LineChart sleepChart;
@@ -242,6 +243,13 @@ public class GrapeActivity extends AppCompatActivity {
 
         sleepChart.getAxisRight().setEnabled(false);
         sleepChart.getDescription().setEnabled(false);
+
+        // 최근 2시간만 보이게 하고, 옆으로 넘겨서 이전 시간 보기
+        sleepChart.setScaleEnabled(false);                  // 손가락 확대는 끄고 좌우 이동만
+        sleepChart.setDragEnabled(true);
+        sleepChart.setVisibleXRangeMaximum(VISIBLE_POINTS);
+        sleepChart.moveViewToX(entries.size() - 1);          // 처음엔 가장 최근 시간이 보이게
+
         sleepChart.animateX(1000);
         sleepChart.invalidate();
     }

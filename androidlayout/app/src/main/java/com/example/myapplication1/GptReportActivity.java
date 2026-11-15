@@ -236,15 +236,21 @@ public class GptReportActivity extends AppCompatActivity {
         int start = text.indexOf('\n', nameAt);   // 섹션 제목 줄 다음부터
         if (start < 0) return null;
 
-        // 가장 가까운 다음 섹션 이름 위치
+        // 가장 가까운 다음 섹션 이름 위치 (없으면 글 끝까지)
         int end = text.length();
+        boolean hasNext = false;
         for (String other : SECTION_NAMES) {
             int at = text.indexOf(other, start);
-            if (at >= 0 && at < end) end = at;
+            if (at >= 0 && at < end) {
+                end = at;
+                hasNext = true;
+            }
         }
-        // 다음 섹션 제목 줄의 시작으로 당김 ("[", "**", "###" 등이 앞에 붙어 있으므로)
-        int lineStart = text.lastIndexOf('\n', end);
-        if (lineStart >= start) end = lineStart;
+        // 다음 섹션이 있을 때만 그 제목 줄의 시작으로 당김 ("[", "**", "###" 등이 앞에 붙어 있으므로)
+        if (hasNext) {
+            int lineStart = text.lastIndexOf('\n', end);
+            if (lineStart >= start) end = lineStart;
+        }
 
         String section = clean(text.substring(start, end));
         return section.isEmpty() ? null : section;
