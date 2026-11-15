@@ -6,8 +6,9 @@ const { SoundAnalysisResult } = require("../models/Soundanalysis");
 // =========================================================
 // 리포트 데이터 설정
 //  USE_SAMPLE_REPORT = false (기본)
-//    → 최근 12시간 실제 데이터(온습도/소음/수면점수/울음)로 리포트 생성
-//    → 실제 데이터가 하나도 없으면 자동으로 아래 SAMPLE_DATA(예시)로 생성
+//    → 가장 최근 밤(NIGHT_START_HOUR ~ NIGHT_END_HOUR) 실제 데이터로 리포트 생성
+//    → 그 밤에 데이터가 없으면 최근 12시간 실제 데이터로 생성
+//    → 그것도 없으면 아래 SAMPLE_DATA(예시)로 생성
 //  USE_SAMPLE_REPORT = true
 //    → 실제 데이터와 상관없이 항상 SAMPLE_DATA(예시)로 생성 (시연 리허설용)
 // =========================================================
@@ -16,7 +17,9 @@ const USE_SAMPLE_REPORT = false;
 const REPORT_TYPE = "아침 수면 종합 리포트";
 const NOISE_DB_OFFSET = 80; // 소음 보정값 (앱 GrapeActivity와 동일: dBFS + 80)
 const NOISE_MIN_DB = 20;    // 평균 소음이 이보다 낮으면 GPT에 숫자 대신 "매우 조용함"으로 전달 (앱 표시 기준과 동일)
-const REPORT_HOURS = 12;    // 리포트 분석 기간 (최근 12시간)
+const REPORT_HOURS = 12;    // 밤 데이터가 없을 때 쓰는 분석 기간 (최근 12시간)
+const NIGHT_START_HOUR = 20; // 리포트 기준 밤 시작 (한국 시간)
+const NIGHT_END_HOUR = 8;    // 리포트 기준 밤 끝 (한국 시간)
 
 // 예시 데이터 (전날 데이터를 못 쌓았을 때 사용)
 const SAMPLE_DATA = {
@@ -36,6 +39,16 @@ const average = (list) =>
     list.length
         ? parseFloat((list.reduce((a, b) => a + b, 0) / list.length).toFixed(1))
         : null;
+
+// 가장 최근에 끝난 밤 (한국 시간 NIGHT_START_HOUR ~ NIGHT_END_HOUR)
+const lastNightRange = (now) => {
+    const todayKst = now.toLocaleDateString("sv-SE", { timeZone: "Asia/Seoul" });
+    let until = new Date(`${todayKst}T${String(NIGHT_END_HOUR).padStart(2, "0")}:00:00+09:00`);
+    if (until > now) until = new Date(until.getTime() - 24 * 60 * 60 * 1000);   // 아직 오늘 밤이 안 끝났으면 전날 밤
+    const nightHours = (24 - NIGHT_START_HOUR + NIGHT_END_HOUR) % 24 || 24;
+    const since = new Date(until.getTime() - nightHours * 60 * 60 * 1000);
+    return { since, until };
+};
 
 // 최근 기간 실제 데이터 집계 (데이터 없으면 null)
 const buildRealData = async (since, now) => {
@@ -86,6 +99,13 @@ const generateAiReport = async (data) => {
 2. 단순 수치 나열이 아니라 데이터를 종합적으로 해석하여 '부모님의 마음'을 고려해 다정하게 설명한다.
 3. 의료적 진단이 아닌 환경 개선을 위한 조언 중심으로 작성한다.
 4. 문장은 자연스러운 한국어로 작성한다.
+5. avgScore는 분석 기간 동안의 평균 수면 환경 점수(100점 만점)이며, 반드시 아래 기준으로 평가한다.
+   - 85점 이상: 아기에게 적합한 환경
+   - 75~84점: 대체로 적합하지만 일부 보완이 필요한 환경
+   - 60~74점: 개선이 필요한 환경
+   - 60점 미만: 아기에게 적합하지 않은 환경
+6. 권장 환경은 온도 23~26°C, 습도 40~60%, 소음 40dB 이하이다. 이 범위를 벗어난 항목은 얼마나 벗어났는지 구체적으로 짚고, [이상 징후 및 권장 행동]에서 실천할 수 있는 개선 방법을 제안한다.
+7. 분석 기간과 dataCount는 환경 데이터를 측정한 기간과 기록 개수일 뿐, 아기의 실제 수면 시간이 아니다. 이 시스템은 수면 시간을 측정하지 않으므로 "몇 시간 잤다"처럼 수면 시간을 추정하거나 언급하지 않는다.
 
 ### [출력 양식]
 [기본 정보]
@@ -121,7 +141,6 @@ ${JSON.stringify(promptData, null, 2)}
 exports.generateDailyReport = async () => {
     try {
         const now = new Date();
-        const since = new Date(now.getTime() - REPORT_HOURS * 60 * 60 * 1000);
 
         // 오늘(한국 날짜) 0시 이후 리포트 조회
         const todayKst = now.toLocaleDateString("sv-SE", { timeZone: "Asia/Seoul" });
@@ -136,8 +155,16 @@ exports.generateDailyReport = async () => {
             return existingReal;
         }
 
-        // 2. 실제 데이터 집계 (USE_SAMPLE_REPORT=true면 건너뜀)
-        const realData = USE_SAMPLE_REPORT ? null : await buildRealData(since, now);
+        // 2. 실제 데이터 집계: 가장 최근 밤 → 없으면 최근 12시간 (USE_SAMPLE_REPORT=true면 건너뜀)
+        let { since, until } = lastNightRange(now);
+        let realData = USE_SAMPLE_REPORT ? null : await buildRealData(since, until);
+
+        if (!realData && !USE_SAMPLE_REPORT) {
+            console.log("🌙 최근 밤 데이터 없음 → 최근 12시간 데이터로 시도");
+            since = new Date(now.getTime() - REPORT_HOURS * 60 * 60 * 1000);
+            until = now;
+            realData = await buildRealData(since, until);
+        }
 
         if (!realData) {
             // 오늘 예시 리포트가 이미 있으면 재사용 (재시작마다 GPT 호출 방지)
@@ -153,7 +180,7 @@ exports.generateDailyReport = async () => {
         const data = {
             reportType: REPORT_TYPE,
             periodStart: toKst(since),
-            periodEnd: toKst(now),
+            periodEnd: toKst(until),
             ...(realData || SAMPLE_DATA)
         };
 
@@ -166,7 +193,7 @@ exports.generateDailyReport = async () => {
         });
         await report.save();
 
-        console.log(`🌅 AI 보고서 생성 완료 (${realData ? "실제 데이터" : "예시 데이터"})`);
+        console.log(`🌅 AI 보고서 생성 완료 (${realData ? "실제 데이터" : "예시 데이터"}, ${data.periodStart} ~ ${data.periodEnd})`);
         return report;
 
     } catch (err) {

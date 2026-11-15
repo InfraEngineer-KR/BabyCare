@@ -39,7 +39,7 @@ class VideoEngine:
 
         # 추후 매핑값으로 변경해 사용
         camera_points = np.float32([[0, 0], [1280, 0], [0, 720], [1280, 720]])
-        thermal_points = np.float32([[40.441, -19.748], [-24.878, -12.697], [40.144, 22.022], [-25.175, 29.073]])
+        thermal_points = np.float32([[43.429, -12.959], [-21.89, -5.908], [43.132, 28.811], [-22.187, 35.862]])
         self.H, _ = cv2.findHomography(camera_points, thermal_points)
 
     def analyze(self, batch_frames, thermal_frame):
@@ -134,7 +134,7 @@ class VideoEngine:
 
                 if tx1 < tx2 and ty1 < ty2:
                     region = thermal_frame[ty1:ty2, tx1:tx2]
-                    temps = region[(region >= 34.0) & (region <= 40.0)]
+                    temps = region[region >= 34.0]
                     if len(temps) > 0:
                         estimated_temp = round(float(np.mean(temps)), 2)
 
@@ -200,7 +200,7 @@ class VideoEngine:
                     if tx1 < tx2 and ty1 < ty2:   # 추가: 유효한 범위일 때만 계산
                         # 열화상 배열에서 해당 영역 추출
                         region = thermal_frame[ty1:ty2, tx1:tx2]
-                        temps = region[(region >= 34.0) & (region <= 40.0)]
+                        temps = region[region >= 34.0]
                         if len(temps) > 0:
                             estimated_temp = round(float(np.mean(temps)), 2)
 
